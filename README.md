@@ -2,10 +2,13 @@
 =============
 
 To test the LDPC encoding and decoding functions, 
-* test_ldpc
-
+```
+test_ldpc
+```
 To test the LDPC encoding function,
-* test_ldpc_encode
+```
+test_ldpc_encode
+```
 
 Currently, the encoding functions only supports K = 8448 case.
 More functions such as rate matching, interleaving will be added in the future.
