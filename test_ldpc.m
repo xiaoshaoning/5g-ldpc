@@ -1,4 +1,4 @@
-% 5g ldpc encoding test
+% 5g ldpc encoding and decoding test
 % reference: 3GPP TS 38.212 section 5.3.2
 % author: Xiao, Shaoning 萧少宁
 % license: MIT
