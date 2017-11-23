@@ -28,7 +28,7 @@ for SNR_list_index = 1:length(SNR_list)
                 
         tx_bits = randi([0, 1], LDPC.inf_bits, 1);
         
-        encoded_bits = ldpc_encode(tx_bits);
+        encoded_bits = ldpc_encode(tx_bits, 1);
         
         symbols = 1 - 2 * encoded_bits;
         

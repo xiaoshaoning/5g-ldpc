@@ -5,27 +5,47 @@
 % author: Xiao, Shaoning 萧少宁
 % license: MIT
 
-function encoded_bits = ldpc_encode(s)
+function [encoded_bits, H] = ldpc_encode(s, base_graph_index)
 
 K = length(s);
 
-z = K/22;
+if base_graph_index == 1
+    a = 4;
+    b = 22;
+    c = 26;
+    d = 42;
+    e = 46;
+    
+    z = K/b;
+    set_index = lifting_size_table_lookup(z);
+    
+    load parity_check_matrices_protocol_1
+    BG = parity_check_matrices_protocol_1(:, :, set_index); %#ok<NODEF>
+elseif base_graph_index == 2
+    a = 4;
+    b = 10;
+    c = 14;
+    d = 38;
+    e = 42;
+    
+    z = K/b;
+    set_index = lifting_size_table_lookup(z);
+    
+    load parity_check_matrices_protocol_2
+    BG = parity_check_matrices_protocol_2(:, :, set_index); %#ok<NODEF>
+else
+  error('wrong base graph index in ldpc encoding.');
+end
 
-set_index = lifting_size_table_lookup(z);
+A_prime = BG(1:a, 1:b);
+B_prime = BG(1:a, (b+1):c);
+C_prime = BG((a+1):e, 1:b);
+D_prime = BG((a+1):e, (b+1):c);
 
-load parity_check_matrices_protocol_1
+A = spalloc(a*z, b*z, nnz(A_prime + ones(size(A_prime))));
 
-BG_1 = parity_check_matrices_protocol_1(:, :, set_index); %#ok<NODEF>
-
-A_prime = BG_1(1:4, 1:22);
-B_prime = BG_1(1:4, 23:26);
-C_prime = BG_1(5:46, 1:22);
-D_prime = BG_1(5:46, 23:26);
-
-A = spalloc(4*z, 22*z, nnz(A_prime + ones(size(A_prime))));
-
-for row_index = 1:4
-    for column_index = 1:22
+for row_index = 1:a
+    for column_index = 1:b
         if A_prime(row_index, column_index) ~= -1
             A((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = sparse(1:z, [A_prime(row_index, column_index)+1:z, 1:A_prime(row_index, column_index)], ones(1, z), z, z);
         else
@@ -34,10 +54,10 @@ for row_index = 1:4
     end
 end
 
-B = spalloc(4*z, 4*z, nnz(B_prime + ones(size(B_prime))));
+B = spalloc(a*z, a*z, nnz(B_prime + ones(size(B_prime))));
 
-for row_index = 1:4
-    for column_index = 1:4
+for row_index = 1:a
+    for column_index = 1:a
         if B_prime(row_index, column_index) ~= -1
             B((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = sparse(1:z, [B_prime(row_index, column_index)+1:z, 1:B_prime(row_index, column_index)], ones(1, z), z, z);
         else
@@ -46,10 +66,10 @@ for row_index = 1:4
     end
 end
 
-C = spalloc(42*z, 22*z, nnz(C_prime + ones(size(C_prime))));
+C = spalloc(d*z, b*z, nnz(C_prime + ones(size(C_prime))));
 
-for row_index = 1:42
-    for column_index = 1:22
+for row_index = 1:d
+    for column_index = 1:b
         if C_prime(row_index, column_index) ~= -1
             C((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = sparse(1:z, [C_prime(row_index, column_index)+1:z, 1:C_prime(row_index, column_index)], ones(1, z), z, z);
         else
@@ -58,10 +78,10 @@ for row_index = 1:42
     end
 end
 
-D = spalloc(42*z, 4*z, nnz(D_prime + ones(size(D_prime))));
+D = spalloc(d*z, a*z, nnz(D_prime + ones(size(D_prime))));
 
-for row_index = 1:42
-    for column_index = 1:4
+for row_index = 1:d
+    for column_index = 1:a
         if D_prime(row_index, column_index) ~= -1
             D((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = sparse(1:z, [D_prime(row_index, column_index)+1:z, 1:D_prime(row_index, column_index)], ones(1, z), z, z);
         else
@@ -70,23 +90,43 @@ for row_index = 1:42
     end
 end
 
-B_inv = spalloc(4*z, 4*z, 20*z);
-B_inv(1:z, 1:z) = sparse(eye(z));
-B_inv(1:z, 1+z:2*z) = sparse(eye(z));
-B_inv(1:z, 1+2*z:3*z) = sparse(eye(z));
-B_inv(1:z, 1+3*z:4*z) = sparse(eye(z));
-B_inv(1+z:2*z, 1:z) = sparse(eye(z) + circshift(eye(z), -1));
-B_inv(1+z:2*z, 1+z:2*z) = sparse(circshift(eye(z), -1));
-B_inv(1+z:2*z, 1+2*z:3*z) = sparse(circshift(eye(z), -1));
-B_inv(1+z:2*z, 1+3*z:4*z) = sparse(circshift(eye(z), -1));
-B_inv(1+2*z:3*z, 1:z) = sparse(circshift(eye(z), -1));
-B_inv(1+2*z:3*z, 1+z:2*z) = sparse(circshift(eye(z), -1));
-B_inv(1+2*z:3*z, 1+2*z:3*z) = sparse(eye(z) + circshift(eye(z), -1));
-B_inv(1+2*z:3*z, 1+3*z:4*z) = sparse(eye(z) + circshift(eye(z), -1));
-B_inv(1+3*z:4*z, 1:z) = sparse(circshift(eye(z), -1));
-B_inv(1+3*z:4*z, 1+z:2*z) = sparse(circshift(eye(z), -1));
-B_inv(1+3*z:4*z, 1+2*z:3*z) = sparse(circshift(eye(z), -1));
-B_inv(1+3*z:4*z, 1+3*z:4*z) = sparse(eye(z) + circshift(eye(z), -1));
+B_inv = spalloc(a*z, a*z, 20*z);
+
+if base_graph_index == 1
+    B_inv(1:z, 1:z) = sparse(eye(z));
+    B_inv(1:z, 1+z:2*z) = sparse(eye(z));
+    B_inv(1:z, 1+2*z:3*z) = sparse(eye(z));
+    B_inv(1:z, 1+3*z:4*z) = sparse(eye(z));
+    B_inv(1+z:2*z, 1:z) = sparse(eye(z) + circshift(eye(z), -1));
+    B_inv(1+z:2*z, 1+z:2*z) = sparse(circshift(eye(z), -1));
+    B_inv(1+z:2*z, 1+2*z:3*z) = sparse(circshift(eye(z), -1));
+    B_inv(1+z:2*z, 1+3*z:4*z) = sparse(circshift(eye(z), -1));
+    B_inv(1+2*z:3*z, 1:z) = sparse(circshift(eye(z), -1));
+    B_inv(1+2*z:3*z, 1+z:2*z) = sparse(circshift(eye(z), -1));
+    B_inv(1+2*z:3*z, 1+2*z:3*z) = sparse(eye(z) + circshift(eye(z), -1));
+    B_inv(1+2*z:3*z, 1+3*z:4*z) = sparse(eye(z) + circshift(eye(z), -1));
+    B_inv(1+3*z:4*z, 1:z) = sparse(circshift(eye(z), -1));
+    B_inv(1+3*z:4*z, 1+z:2*z) = sparse(circshift(eye(z), -1));
+    B_inv(1+3*z:4*z, 1+2*z:3*z) = sparse(circshift(eye(z), -1));
+    B_inv(1+3*z:4*z, 1+3*z:4*z) = sparse(eye(z) + circshift(eye(z), -1));
+else
+    B_inv(1:z, 1:z)             = circshift(eye(z), 1);
+    B_inv(1:z, 1+z:2*z)         = circshift(eye(z), 1);
+    B_inv(1:z, 1+2*z:3*z)       = circshift(eye(z), 1);
+    B_inv(1:z, 1+3*z:4*z)       = circshift(eye(z), 1);
+    B_inv(1+z:2*z, 1:z)         = eye(z) + circshift(eye(z), 1);
+    B_inv(1+z:2*z, 1+z:2*z)     = circshift(eye(z), 1);
+    B_inv(1+z:2*z, 1+2*z:3*z)   = circshift(eye(z), 1);
+    B_inv(1+z:2*z, 1+3*z:4*z)   = circshift(eye(z), 1);
+    B_inv(1+2*z:3*z, 1:z)       = eye(z) + circshift(eye(z), 1);
+    B_inv(1+2*z:3*z, 1+z:2*z)   = eye(z) + circshift(eye(z), 1);
+    B_inv(1+2*z:3*z, 1+2*z:3*z) = circshift(eye(z), 1);
+    B_inv(1+2*z:3*z, 1+3*z:4*z) = circshift(eye(z), 1);
+    B_inv(1+3*z:4*z, 1:z)       = circshift(eye(z), 1);
+    B_inv(1+3*z:4*z, 1+z:2*z)   = circshift(eye(z), 1);
+    B_inv(1+3*z:4*z, 1+2*z:3*z) = circshift(eye(z), 1);
+    B_inv(1+3*z:4*z, 1+3*z:4*z) = eye(z) + circshift(eye(z), 1);
+end
 
 s = s(:);
 
@@ -94,5 +134,7 @@ p_1 = mod(B_inv * (A * s), 2);
 p_2 = mod(C * s + D * p_1, 2);
 
 encoded_bits = [s; p_1; p_2];
+
+H = [A, B, spalloc(a*z, d*z, 0); C, D, speye(d*z)];
 
 end

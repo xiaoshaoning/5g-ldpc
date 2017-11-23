@@ -11,7 +11,7 @@ z = 384;
 
 s = randi([0, 1], K, 1);
 
-encoded_bits = ldpc_encode(s);
+encoded_bits = ldpc_encode(s, 1);
 
 load H
 
