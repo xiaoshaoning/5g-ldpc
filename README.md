@@ -10,7 +10,7 @@ To test the LDPC encoding function,
 test_ldpc_encode
 ```
 
-Currently, the encoding functions only supports K = 8448 case.
+Currently, the encoding function was only tested for K = 8448 and K = 3840.
 More functions such as rate matching, interleaving will be added in the future.
 
 The LDPC decoding function decLDPC_layered.m is from [Simulator for LDPC decoding in IEEE 802.11n](http://www.csl.cornell.edu/~studer/software_ldpc.html) and the author is Christoph Studer. I only made a small modification on the decoding function.
