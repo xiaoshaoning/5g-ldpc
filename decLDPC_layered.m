@@ -18,8 +18,7 @@
 %   Author: Dr. Christoph Studer (e-mail: studer@rice.edu)     
 % =========================================================================
 
-function [bit_output,LLR_D2,NumC,NumV] = decLDPC_layered(TxRx,LDPC,LLR_A2)
-
+function [bit_output,LLR_D2,NumC,NumV] = decLDPC_layered(TxRx,LDPC,LLR_A2, base_graph_check_node_list)
   % -- initializations
   numOfEntries = sum(sum(LDPC.H==1));
   Rcv = spalloc(LDPC.par_bits,LDPC.tot_bits,numOfEntries); % msg matrix
@@ -42,7 +41,8 @@ function [bit_output,LLR_D2,NumC,NumV] = decLDPC_layered(TxRx,LDPC,LLR_A2)
       case 'SPA', % -- sum-product algorithm                
         % == for all parity check node
         for j=1:LDPC.par_bits     
-          idx = find(LDPC.H(j,:)==1); % slow
+          % idx = find(LDPC.H(j,:)==1); % slow
+          idx = base_graph_check_node_list{j};
           S = LLR_D2(idx)-full(Rcv(j,idx));      
           Spsi = sum(-log(1e-300+tanh(abs(S)*0.5)));
           Ssgn = prod(sign(S));              
@@ -61,7 +61,8 @@ function [bit_output,LLR_D2,NumC,NumV] = decLDPC_layered(TxRx,LDPC,LLR_A2)
       case 'MPA', % -- max-log approximation (max-product algorithm)
         % == for all parity check node
         for j=1:LDPC.par_bits               
-          idx = find(LDPC.H(j,:)==1); % slow      
+          %idx = find(LDPC.H(j,:)==1); % slow
+          idx = base_graph_check_node_list{j};
           S = LLR_D2(idx)-full(Rcv(j,idx));                  
           for v=1:length(idx)             
             Stmp = S;
@@ -76,7 +77,9 @@ function [bit_output,LLR_D2,NumC,NumV] = decLDPC_layered(TxRx,LDPC,LLR_A2)
       case 'OMS', % -- offset min-sum [Chen05]
         % == for all parity check node
         for j=1:LDPC.par_bits               
-          idx = find(LDPC.H(j,:)==1); % slow      
+          % idx = find(LDPC.H(j,:)==1); % slow
+          idx = base_graph_check_node_list{j};
+          
           S = LLR_D2(idx)-full(Rcv(j,idx));                  
           for v=1:length(idx)                                        
             Stmp = S;
@@ -99,7 +102,6 @@ function [bit_output,LLR_D2,NumC,NumV] = decLDPC_layered(TxRx,LDPC,LLR_A2)
  
   % -- compute binary-valued estimates
   bit_output = 0.5*(1-mysign(LLR_D2(1:LDPC.inf_bits)));
-  
   
 return
 

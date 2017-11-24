@@ -4,7 +4,11 @@
 % license: MIT
 % currently the only supported case is K = 8448
 
-function test_ldpc
+function test_ldpc(base_graph_index)
+
+if nargin == 0
+  base_graph_index = 1;    
+end
 
 SNR_list = 15:15;
 
@@ -14,11 +18,19 @@ BLER = zeros(1, length(SNR_list));
 
 TxRx.Decoder.LDPC.Iterations = 10;
 TxRx.Decoder.LDPC.Type = 'OMS';
+% TxRx.Decoder.LDPC.Type = 'MPA';
 
-load H
-LDPC.H = H;
-[LDPC.par_bits,LDPC.tot_bits] = size(LDPC.H);
-LDPC.inf_bits = LDPC.tot_bits - LDPC.par_bits;
+if base_graph_index == 1
+  load base_graph_1_check_node_list
+  base_graph_check_node_list = base_graph_1_check_node_list;
+  LDPC.inf_bits = 8448;
+elseif base_graph_index == 2
+  load base_graph_2_check_node_list
+  base_graph_check_node_list = base_graph_2_check_node_list;
+  LDPC.inf_bits = 3840;
+else
+  error('wrong base graph index.');
+end
 
 for SNR_list_index = 1:length(SNR_list)
     
@@ -28,7 +40,9 @@ for SNR_list_index = 1:length(SNR_list)
                 
         tx_bits = randi([0, 1], LDPC.inf_bits, 1);
         
-        encoded_bits = ldpc_encode(tx_bits, 1);
+        [encoded_bits, LDPC.H] = ldpc_encode(tx_bits, base_graph_index);
+        
+        [LDPC.par_bits, LDPC.tot_bits] = size(LDPC.H);
         
         symbols = 1 - 2 * encoded_bits;
         
@@ -38,7 +52,7 @@ for SNR_list_index = 1:length(SNR_list)
         
         LLR_received = 2 * waveform / sigma_square;
         
-        rx_bits = decLDPC_layered(TxRx, LDPC, LLR_received);
+        rx_bits = decLDPC_layered(TxRx, LDPC, LLR_received, base_graph_check_node_list);
         
         rx_bits = rx_bits(:);
         
