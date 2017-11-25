@@ -21,7 +21,8 @@
 function [bit_output,LLR_D2,NumC,NumV] = decLDPC_layered(TxRx,LDPC,LLR_A2, base_graph_check_node_list)
   % -- initializations
   numOfEntries = sum(sum(LDPC.H==1));
-  Rcv = spalloc(LDPC.par_bits,LDPC.tot_bits,numOfEntries); % msg matrix
+%   Rcv = spalloc(LDPC.par_bits,LDPC.tot_bits,numOfEntries); % msg matrix
+  Rcv = zeros(LDPC.par_bits, LDPC.tot_bits);
   LLR_D2 = LLR_A2; % initialize with input bitslis
 %   bit_output = zeros(1, LDPC.inf_bits);
   NumC = 0; % number of computed check nodes
@@ -80,7 +81,7 @@ function [bit_output,LLR_D2,NumC,NumV] = decLDPC_layered(TxRx,LDPC,LLR_A2, base_
           % idx = find(LDPC.H(j,:)==1); % slow
           idx = base_graph_check_node_list{j};
           
-          S = LLR_D2(idx)-full(Rcv(j,idx));                  
+          S = LLR_D2(idx)-Rcv(j,idx);                  
           for v=1:length(idx)                                        
             Stmp = S;
             Stmp(v) = []; % clear row            
@@ -102,6 +103,8 @@ function [bit_output,LLR_D2,NumC,NumV] = decLDPC_layered(TxRx,LDPC,LLR_A2, base_
  
   % -- compute binary-valued estimates
   bit_output = 0.5*(1-mysign(LLR_D2(1:LDPC.inf_bits)));
+  
+  clear Rcv
   
 return
 

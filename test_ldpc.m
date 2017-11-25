@@ -52,7 +52,7 @@ for SNR_list_index = 1:length(SNR_list)
         
         LLR_received = 2 * waveform / sigma_square;
         
-        rx_bits = decLDPC_layered(TxRx, LDPC, LLR_received, base_graph_check_node_list);
+        rx_bits = decLDPC_layered(TxRx, LDPC, LLR_received.', base_graph_check_node_list);
         
         rx_bits = rx_bits(:);
         

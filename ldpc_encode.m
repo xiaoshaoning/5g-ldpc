@@ -137,4 +137,14 @@ encoded_bits = [s; p_1; p_2];
 
 H = [A, B, spalloc(a*z, d*z, 0); C, D, speye(d*z)];
 
+clear A
+clear B
+clear C
+clear D
+clear B_inv
+clear A_prime
+clear B_prime
+clear C_prime
+clear D_prime
+
 end
