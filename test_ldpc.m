@@ -46,7 +46,7 @@ for SNR_list_index = 1:length(SNR_list)
         
         symbols = 1 - 2 * encoded_bits;
         
-        noise = randn(1, length(symbols));
+        noise = randn(size(symbols));
         
         waveform = symbols + noise * sqrt(sigma_square);
         
