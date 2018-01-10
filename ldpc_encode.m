@@ -64,7 +64,7 @@ A = spalloc(a*z, b*z, nnz(A_prime + ones(size(A_prime))));
 for row_index = 1:a
     for column_index = 1:b
         if A_prime(row_index, column_index) ~= -1
-            A((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = sparse(1:z, [A_prime(row_index, column_index)+1:z, 1:A_prime(row_index, column_index)], ones(1, z), z, z);
+            A((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = sparse(1:z, [(mod(A_prime(row_index, column_index), z)+1):z, 1:mod(A_prime(row_index, column_index), z)], ones(1, z), z, z);
         else
             A((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = spalloc(z, z, 0);
         end
@@ -76,7 +76,7 @@ B = spalloc(a*z, a*z, nnz(B_prime + ones(size(B_prime))));
 for row_index = 1:a
     for column_index = 1:a
         if B_prime(row_index, column_index) ~= -1
-            B((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = sparse(1:z, [B_prime(row_index, column_index)+1:z, 1:B_prime(row_index, column_index)], ones(1, z), z, z);
+            B((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = sparse(1:z, [(mod(B_prime(row_index, column_index), z)+1):z, 1:mod(B_prime(row_index, column_index), z)], ones(1, z), z, z);
         else
             B((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = spalloc(z, z, 0);
         end
@@ -88,7 +88,7 @@ C = spalloc(d*z, b*z, nnz(C_prime + ones(size(C_prime))));
 for row_index = 1:d
     for column_index = 1:b
         if C_prime(row_index, column_index) ~= -1
-            C((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = sparse(1:z, [C_prime(row_index, column_index)+1:z, 1:C_prime(row_index, column_index)], ones(1, z), z, z);
+            C((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = sparse(1:z, [(mod(C_prime(row_index, column_index), z)+1):z, 1:mod(C_prime(row_index, column_index), z)], ones(1, z), z, z);
         else
             C((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = spalloc(z, z, 0);
         end
@@ -100,7 +100,7 @@ D = spalloc(d*z, a*z, nnz(D_prime + ones(size(D_prime))));
 for row_index = 1:d
     for column_index = 1:a
         if D_prime(row_index, column_index) ~= -1
-            D((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = sparse(1:z, [D_prime(row_index, column_index)+1:z, 1:D_prime(row_index, column_index)], ones(1, z), z, z);
+            D((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = sparse(1:z, [(mod(D_prime(row_index, column_index), z)+1):z, 1:mod(D_prime(row_index, column_index), z)], ones(1, z), z, z);
         else
             D((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = spalloc(z, z, 0);
         end
@@ -182,18 +182,18 @@ elseif (base_graph_index == 2) && ((set_index == 4) || (set_index == 8))
     B_inv(1:z, 1+z:2*z)         = speye(z);
     B_inv(1:z, 1+2*z:3*z)       = speye(z);
     B_inv(1:z, 1+3*z:4*z)       = speye(z);
-    B_inv(1+z:2*z, 1:z)         = speye(z) + sparse(1:z, [z, 1:(z-1)], ones(1, z), z, z);
-    B_inv(1+z:2*z, 1+z:2*z)     = sparse(1:z, [z, 1:(z-1)], ones(1, z), z, z);
-    B_inv(1+z:2*z, 1+2*z:3*z)   = sparse(1:z, [z, 1:(z-1)], ones(1, z), z, z);
-    B_inv(1+z:2*z, 1+3*z:4*z)   = sparse(1:z, [z, 1:(z-1)], ones(1, z), z, z);
-    B_inv(1+2*z:3*z, 1:z)       = speye(z) + sparse(1:z, [z, 1:(z-1)], ones(1, z), z, z);
-    B_inv(1+2*z:3*z, 1+z:2*z)   = speye(z) + sparse(1:z, [z, 1:(z-1)], ones(1, z), z, z);
-    B_inv(1+2*z:3*z, 1+2*z:3*z) = sparse(1:z, [z, 1:(z-1)], ones(1, z), z, z);
-    B_inv(1+2*z:3*z, 1+3*z:4*z) = sparse(1:z, [z, 1:(z-1)], ones(1, z), z, z);
-    B_inv(1+3*z:4*z, 1:z)       = sparse(1:z, [z, 1:(z-1)], ones(1, z), z, z);
-    B_inv(1+3*z:4*z, 1+z:2*z)   = sparse(1:z, [z, 1:(z-1)], ones(1, z), z, z);
-    B_inv(1+3*z:4*z, 1+2*z:3*z) = sparse(1:z, [z, 1:(z-1)], ones(1, z), z, z);
-    B_inv(1+3*z:4*z, 1+3*z:4*z) = speye(z) + sparse(1:z, [z, 1:(z-1)], ones(1, z), z, z);    
+    B_inv(1+z:2*z, 1:z)         = speye(z) + sparse(1:z, [2:z, 1], ones(1, z), z, z);
+    B_inv(1+z:2*z, 1+z:2*z)     = sparse(1:z, [2:z, 1], ones(1, z), z, z);
+    B_inv(1+z:2*z, 1+2*z:3*z)   = sparse(1:z, [2:z, 1], ones(1, z), z, z);
+    B_inv(1+z:2*z, 1+3*z:4*z)   = sparse(1:z, [2:z, 1], ones(1, z), z, z);
+    B_inv(1+2*z:3*z, 1:z)       = speye(z) + sparse(1:z, [2:z, 1], ones(1, z), z, z);
+    B_inv(1+2*z:3*z, 1+z:2*z)   = speye(z) + sparse(1:z, [2:z, 1], ones(1, z), z, z);
+    B_inv(1+2*z:3*z, 1+2*z:3*z) = sparse(1:z, [2:z, 1], ones(1, z), z, z);
+    B_inv(1+2*z:3*z, 1+3*z:4*z) = sparse(1:z, [2:z, 1], ones(1, z), z, z);
+    B_inv(1+3*z:4*z, 1:z)       = sparse(1:z, [2:z, 1], ones(1, z), z, z);
+    B_inv(1+3*z:4*z, 1+z:2*z)   = sparse(1:z, [2:z, 1], ones(1, z), z, z);
+    B_inv(1+3*z:4*z, 1+2*z:3*z) = sparse(1:z, [2:z, 1], ones(1, z), z, z);
+    B_inv(1+3*z:4*z, 1+3*z:4*z) = speye(z) + sparse(1:z, [2:z, 1], ones(1, z), z, z);    
 end
 
 s = s(:);
