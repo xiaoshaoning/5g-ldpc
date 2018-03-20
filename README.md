@@ -3,11 +3,7 @@
 
 To test the LDPC encoding and decoding functions, run the following function under matlab 
 ```
-test_ldpc
-```
-To test the LDPC encoding function, execute the below function under matlab,
-```
-test_ldpc_encode
+test_all_ldpc_cases
 ```
 
 The LDPC decoding function decLDPC_layered.m is from [Simulator for LDPC decoding in IEEE 802.11n](http://www.csl.cornell.edu/~studer/software_ldpc.html) and the author is Christoph Studer. I made some small modifications on it to accelerate its execution.

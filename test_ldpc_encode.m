@@ -11,11 +11,11 @@ z = 384;
 
 s = randi([0, 1], K, 1);
 
-encoded_bits = ldpc_encode(s, 1);
+[~, ~, ~, encoded_bits_original] = ldpc_encode(s, 1);
 
 load H
 
-x = mod(H * encoded_bits, 2);
+x = mod(H * encoded_bits_original, 2);
 
 if isequal(x, zeros(46*z, 1))
     disp('LDPC encoding test passed.');

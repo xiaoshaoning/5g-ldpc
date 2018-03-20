@@ -11,9 +11,9 @@ z = 384;
 
 s = randi([0, 1], K, 1);
 
-[encoded_bits, H] = ldpc_encode(s, 2);
+[~, H, ~, encoded_bits_original] = ldpc_encode(s, 2);
 
-x = mod(H * encoded_bits, 2);
+x = mod(H * encoded_bits_original, 2);
 
 y = zeros(42*z, 1);
 

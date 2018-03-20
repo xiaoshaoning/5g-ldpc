@@ -5,7 +5,7 @@
 % author: Xiao, Shaoning 萧少宁
 % license: MIT
 
-function [encoded_bits, H, Z_c] = ldpc_encode(s, base_graph_index)
+function [encoded_bits, H, Z_c, encoded_bits_original] = ldpc_encode(s, base_graph_index)
 
 K = length(s);
 
@@ -39,6 +39,8 @@ elseif base_graph_index == 2
 else
   error('wrong base graph index in ldpc encoding.');
 end
+
+BG(BG ~= -1) = mod(BG(BG ~= -1), Z_c); 
 
 for k = (2*Z_c):(K-1)
   if s(k+1) ~= -1
@@ -208,6 +210,8 @@ for k = K:(N+2*Z_c-1)
 end    
 
 H = [A, B, spalloc(a*z, d*z, 0); C, D, speye(d*z)];
+
+encoded_bits_original = [s; w]; 
 
 % mod(H * [s; p_1; p_2]) = 0
 
