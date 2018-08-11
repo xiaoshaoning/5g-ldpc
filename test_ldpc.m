@@ -46,8 +46,9 @@ for SNR_list_index = 1:length(SNR_list)
         
         tx_bits = randi([0, 1], LDPC.inf_bits, 1);
         
-        [encoded_bits, LDPC.H, Z_c] = ldpc_encode(tx_bits, base_graph_index);
-        
+%         [encoded_bits, LDPC.H, Z_c] = ldpc_encode(tx_bits, base_graph_index);
+        [encoded_bits, LDPC.H, Z_c] = ldpc_encode_optimized(tx_bits, base_graph_index);
+                
         [LDPC.par_bits, LDPC.tot_bits] = size(LDPC.H);
         
         symbols = 1 - 2 * encoded_bits;

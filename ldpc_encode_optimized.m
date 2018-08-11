@@ -5,7 +5,7 @@
 % author: Xiao, Shaoning 萧少宁
 % license: MIT
 
-function [encoded_bits, H, Z_c, encoded_bits_original] = ldpc_encode(s, base_graph_index)
+function [encoded_bits, H, Z_c, encoded_bits_original] = ldpc_encode_optimized(s, base_graph_index)
 
 K = length(s);
 
@@ -61,47 +61,65 @@ D_prime = BG((a+1):e, (b+1):c);
 
 z = Z_c;
 
-A = spalloc(a*z, b*z, nnz(A_prime + ones(size(A_prime))));
-
+a_row_list = [];
+a_column_list = [];
+a_none_zero_entry_number = 0;
 for row_index = 1:a
     for column_index = 1:b
         if A_prime(row_index, column_index) ~= -1
-            A((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = sparse(1:z, [(mod(A_prime(row_index, column_index), z)+1):z, 1:mod(A_prime(row_index, column_index), z)], ones(1, z), z, z);
+            a_none_zero_entry_number = a_none_zero_entry_number + 1;
+            a_row_list = [a_row_list, (row_index-1)*z+1:row_index*z];
+            a_column_list = [a_column_list, (column_index-1)*z+1+mod(A_prime(row_index, column_index), z):column_index*z, (column_index-1)*z+1:(column_index-1)*z+mod(A_prime(row_index, column_index), z)];
         end
     end
 end
 
-B = spalloc(a*z, a*z, nnz(B_prime + ones(size(B_prime))));
-
+A = sparse(a_row_list, a_column_list, ones(1, z * a_none_zero_entry_number), z * a, z * b);
+  
+b_row_list = [];
+b_column_list = [];
+b_none_zero_entry_number = 0;
 for row_index = 1:a
     for column_index = 1:a
         if B_prime(row_index, column_index) ~= -1
-            B((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = sparse(1:z, [(mod(B_prime(row_index, column_index), z)+1):z, 1:mod(B_prime(row_index, column_index), z)], ones(1, z), z, z);
+            b_none_zero_entry_number = b_none_zero_entry_number + 1;
+            b_row_list = [b_row_list, (row_index-1)*z+1:row_index*z];
+            b_column_list = [b_column_list, (column_index-1)*z+1+mod(B_prime(row_index, column_index), z):column_index*z, (column_index-1)*z+1:(column_index-1)*z+mod(B_prime(row_index, column_index), z)];
         end
     end
 end
 
-C = spalloc(d*z, b*z, nnz(C_prime + ones(size(C_prime))));
+B = sparse(b_row_list, b_column_list, ones(1, z * b_none_zero_entry_number), z * a, z * a);
 
+c_row_list = [];
+c_column_list = [];
+c_none_zero_entry_number = 0;
 for row_index = 1:d
     for column_index = 1:b
         if C_prime(row_index, column_index) ~= -1
-            C((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = sparse(1:z, [(mod(C_prime(row_index, column_index), z)+1):z, 1:mod(C_prime(row_index, column_index), z)], ones(1, z), z, z);
+            c_none_zero_entry_number = c_none_zero_entry_number + 1;
+            c_row_list = [c_row_list, (row_index-1)*z+1:row_index*z];
+            c_column_list = [c_column_list, (column_index-1)*z+1+mod(C_prime(row_index, column_index), z):column_index*z, (column_index-1)*z+1:(column_index-1)*z+mod(C_prime(row_index, column_index), z)];
         end
     end
 end
 
-D = spalloc(d*z, a*z, nnz(D_prime + ones(size(D_prime))));
+C = sparse(c_row_list, c_column_list, ones(1, z * c_none_zero_entry_number), z * d, z * b);
 
+d_row_list = [];
+d_column_list = [];
+d_none_zero_entry_number = 0;
 for row_index = 1:d
     for column_index = 1:a
         if D_prime(row_index, column_index) ~= -1
-            D((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = sparse(1:z, [(mod(D_prime(row_index, column_index), z)+1):z, 1:mod(D_prime(row_index, column_index), z)], ones(1, z), z, z);
-        else
-            D((row_index-1)*z+1:row_index*z, (column_index-1)*z+1:column_index*z) = spalloc(z, z, 0);
+            d_none_zero_entry_number = d_none_zero_entry_number + 1;
+            d_row_list = [d_row_list, (row_index-1)*z+1:row_index*z];
+            d_column_list = [d_column_list, (column_index-1)*z+1+mod(D_prime(row_index, column_index), z):column_index*z, (column_index-1)*z+1:(column_index-1)*z+mod(D_prime(row_index, column_index), z)];
         end
     end
 end
+
+D = sparse(d_row_list, d_column_list, ones(1, z * d_none_zero_entry_number), z * d, z * a);
 
 B_inv = spalloc(a*z, a*z, 20*z);
 
