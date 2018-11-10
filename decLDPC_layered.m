@@ -18,12 +18,13 @@
 %   Author: Dr. Christoph Studer (e-mail: studer@rice.edu)     
 % =========================================================================
 
-function [bit_output,LLR_D2,NumC,NumV] = decLDPC_layered(TxRx,LDPC,LLR_A2, base_graph_check_node_list)
+function [bit_output,LLR_D2,NumC,NumV] = decLDPC_layered(TxRx,LDPC,LLR_A2, base_graph_check_node_list, Z_c)
   % -- initializations
   numOfEntries = sum(sum(LDPC.H==1));
 %   Rcv = spalloc(LDPC.par_bits,LDPC.tot_bits,numOfEntries); % msg matrix
   Rcv = zeros(LDPC.par_bits, LDPC.tot_bits);
-  LLR_D2 = LLR_A2; % initialize with input bitslis
+  LLR_D2 = [zeros(1, 2*Z_c), LLR_A2];
+  % initialize with input bitslis
 %   bit_output = zeros(1, LDPC.inf_bits);
   NumC = 0; % number of computed check nodes
   NumV = 0; % number of computed variable nodes   
