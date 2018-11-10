@@ -18,7 +18,7 @@ end
 
 SNR_list = 10;
 
-trial_number = 20;
+trial_number = 1;
 
 BLER = zeros(1, length(SNR_list));
 
