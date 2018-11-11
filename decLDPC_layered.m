@@ -81,33 +81,26 @@ for iter=1:TxRx.Decoder.LDPC.Iterations
             for j=1:LDPC.par_bits
                 % idx = find(LDPC.H(j,:)==1); % slow
                 idx = base_graph_check_node_list{j};
-                length_S = length(idx);
                 S = LLR_D2(idx)-Rcv(j,idx);
-                Stmp_double = [S, S];
-                Stmp_double_abs = abs(Stmp_double);
-%                 Stmp_double_sign = sign(Stmp_double);
+                Stmp_abs = abs(S);
+
+                [Stmp_abs_min, min_position] = min(Stmp_abs);
+                Stmp_abs_without_min = Stmp_abs;
+                Stmp_abs_without_min(min_position) = [];
+                Stmp_abs_second_min = min(Stmp_abs_without_min);
                                
                 Stmp_sign_1 = sign(S);
                 Stmp_sign_1(Stmp_sign_1==0) = 1;       
                 Stmp_sign_prod = prod(Stmp_sign_1);
                 for v=1:length(idx)
-                    %                     Stmp = S;
-                    %                     Stmp(v) = []; % clear row
-                    %Stmp = Stmp_double(v+1:v+length_S-1);
-                    
-                    Stmp_abs = Stmp_double_abs(v+1:v+length_S-1);
-%                     Stmp_sign = Stmp_double_sign(v+1:v+length_S-1);
-                    
-                    % --> 0.3 seems to be good shift value (requires simulations)
-                    %Magnitude =  max(min(abs(Stmp))-0.3, 0);
-                    %Signum = prod(sign(Stmp));
-                    Magnitude =  max(min(Stmp_abs)-0.3, 0);
-%                     Signum_prime = prod(Stmp_sign);
+                    if v == min_position
+                        Magnitude = Stmp_abs_second_min;
+                    else    
+                        Magnitude = Stmp_abs_min;
+                    end
+
                     Signum = Stmp_sign_prod * Stmp_sign_1(v);
                     
-%                     if Signum ~= Signum_prime
-%                         disp('OK');
-%                     end
                     Rcv(j,idx(v)) = Signum*Magnitude;
                     LLR_D2(idx(v)) = S(v) + Rcv(j,idx(v));
                     % --variable node & check node computed
