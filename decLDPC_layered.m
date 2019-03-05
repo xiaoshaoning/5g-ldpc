@@ -79,8 +79,8 @@ for iter=1:TxRx.Decoder.LDPC.Iterations
         case 'OMS' % -- offset min-sum [Chen05]
             % == for all parity check node
             for j=1:LDPC.par_bits
-                % idx = find(LDPC.H(j,:)==1); % slow
-                idx = base_graph_check_node_list{j};
+                idx = find(LDPC.H(j,:)==1); % slow
+%                 idx = base_graph_check_node_list{j};
                 S = LLR_D2(idx)-Rcv(j,idx);
                 Stmp_abs = abs(S);
 
